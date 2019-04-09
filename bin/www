@@ -50,9 +50,16 @@ function normalizePort(val) {
   return false
 }
 
+function reverseString(str) {
+  return str
+    .split('')
+    .reverse()
+    .join('')
+}
+
 io.on('connection', function(socket) {
   socket.on('chat message', function(msg) {
-    io.emit('chat message', 'ik ben een mongool')
+    io.emit('chat message', reverseString(msg))
   })
 })
 
