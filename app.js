@@ -51,42 +51,70 @@ function shuffle(array) {
   return array
 }
 
-var sourceLang = 'auto'
-var targetLang = 'en'
+String.prototype.replaceAll = function(str1, str2, ignore) {
+  return this.replace(
+    new RegExp(
+      str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'),
+      ignore ? 'gi' : 'g'
+    ),
+    typeof str2 == 'string' ? str2.replace(/\$/g, '$$$$') : str2
+  )
+}
 
 io.on('connection', socket => {
   socket.on('chat message', msg => {
     if (msg) {
       io.emit('chat message', msg)
-      var sourceText = msg
-      var url =
-        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
-        sourceLang +
-        '&tl=' +
-        targetLang +
-        '&dt=t&q=' +
-        encodeURI(sourceText)
-      fetch(url)
-        .then(function(response) {
-          return response.json()
-        })
-        .then(function(myJson) {
-          var newMsg = JSON.stringify(myJson[0][0][0])
-          var oldMsg = JSON.stringify(myJson[0][0][1])
-          var lang = JSON.stringify(myJson[2])
-          console.log(newMsg)
-          io.emit(
-            'chat message',
-            // 'Recognized language: ' +
-            //   lang +
-            //   ' Message: ' +
-            //   oldMsg +
-            ' Translated to English: ' + newMsg
-          )
-        })
-      // Message.create({ name: 'onbekend', message: newMsg }).then(
-      //   console.log(newMsg + ' stored in db')
-      // )
+      if (msg.includes('!help')) {
+        io.emit(
+          'chat message',
+          'Momenteel heeft deze chat de volgende functionaliteiten:'
+        )
+        io.emit('chat message', '- Vertaling (!translate)')
+        io.emit('chat message', '- Youtube link (!youtube)')
+      }
+      if (msg.includes('!youtube ') && msg.replace('!youtube ', '') != '') {
+        var noYT = msg.replace('!youtube', '')
+        var noSpace = noYT.replace(' ', '')
+        var query = noSpace.replaceAll(' ', '+')
+        url = 'https://www.youtube.com/results?search_query=' + query
+        io.emit('chat message', url)
+      }
+      if (msg.includes('!translate ') && msg.replace('!translate ', '') != '') {
+        var sourceText = msg.replace('!translate', '')
+        var sourceLang = 'auto'
+        var targetLang = 'en'
+        var url =
+          'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
+          sourceLang +
+          '&tl=' +
+          targetLang +
+          '&dt=t&q=' +
+          encodeURI(sourceText)
+        fetch(url)
+          .then(function(response) {
+            return response.json()
+          })
+          .then(function(myJson) {
+            var newMsg = JSON.stringify(myJson[0][0][0])
+            var oldMsg = JSON.stringify(myJson[0][0][1])
+            var lang = JSON.stringify(myJson[2])
+            console.log(newMsg)
+            console.log(JSON.stringify(myJson))
+            io.emit(
+              'chat message',
+              'Recognized language ' +
+                lang +
+                //   ' Message: ' +
+                //   oldMsg +
+                ' translated to "en": ' +
+                newMsg
+            )
+          })
+        // Message.create({ name: 'onbekend', message: newMsg }).then(
+        //   console.log(newMsg + ' stored in db')
+        // )
+      }
     }
   })
   console.log('A user connected')
