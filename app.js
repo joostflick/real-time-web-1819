@@ -14,7 +14,7 @@ const path = require('path')
 
 const io = require('socket.io')(http)
 
-const port = 7070
+const port = process.env.PORT || 7070
 
 app.use(express.static(path.join(__dirname, 'public')))
 
