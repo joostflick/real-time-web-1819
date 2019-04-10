@@ -31,6 +31,7 @@ app.get('/', (req, res) => {
   res.render('index')
 })
 
+// shuffle function
 function shuffle(array) {
   var currentIndex = array.length,
     temporaryValue,
@@ -51,6 +52,7 @@ function shuffle(array) {
   return array
 }
 
+// replace all function
 String.prototype.replaceAll = function(str1, str2, ignore) {
   return this.replace(
     new RegExp(
@@ -62,16 +64,25 @@ String.prototype.replaceAll = function(str1, str2, ignore) {
 }
 
 io.on('connection', socket => {
+  io.emit(
+    'chat message',
+    'Hi! Type !help to see which commands are currently available'
+  )
   socket.on('chat message', msg => {
     if (msg) {
       io.emit('chat message', msg)
       if (msg.includes('!help')) {
-        io.emit(
-          'chat message',
-          'Momenteel heeft deze chat de volgende functionaliteiten:'
-        )
-        io.emit('chat message', '- Vertaling (!translate)')
+        io.emit('chat message', 'This chat utilizes the following commands::')
+        io.emit('chat message', '- Translation (!translate)')
         io.emit('chat message', '- Youtube link (!youtube)')
+        io.emit('chat message', '- Shuffle text (!shuffle)')
+      }
+      if (msg.includes('!shuffle ') && msg.replace('!youtube ', '') != '') {
+        var noShuffle = msg.replace('!shuffle', '')
+        var splitmsg = noShuffle.split(' ')
+        var shuffled = shuffle(splitmsg).join(' ')
+        var addSpaces = shuffled.replaceAll(',', ' ')
+        io.emit('chat message', 'Shuffled message: ' + addSpaces)
       }
       if (msg.includes('!youtube ') && msg.replace('!youtube ', '') != '') {
         var noYT = msg.replace('!youtube', '')
