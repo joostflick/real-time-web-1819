@@ -57,6 +57,7 @@ var targetLang = 'en'
 io.on('connection', socket => {
   socket.on('chat message', msg => {
     if (msg) {
+      io.emit('chat message', msg)
       var sourceText = msg
       var url =
         'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
@@ -80,8 +81,7 @@ io.on('connection', socket => {
             //   lang +
             //   ' Message: ' +
             //   oldMsg +
-            //   ' Translated to English: ' +
-            newMsg
+            ' Translated to English: ' + newMsg
           )
         })
       // Message.create({ name: 'onbekend', message: newMsg }).then(
