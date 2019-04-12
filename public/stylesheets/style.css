@@ -41,7 +41,7 @@ form button {
 }
 
 .botmessage {
-  font-weight: bold;
+  font-family: monospace !important;
   color: red;
 }
 
