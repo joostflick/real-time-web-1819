@@ -7,6 +7,7 @@ require('isomorphic-fetch')
 var bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+const axios = require('axios')
 
 var dbUrl = 'mongodb://messages:messages1@ds225492.mlab.com:25492/messages'
 
@@ -64,32 +65,49 @@ String.prototype.replaceAll = function(str1, str2, ignore) {
 }
 
 io.on('connection', socket => {
-  io.emit(
-    'chat message',
-    'Hi! Type !help to see which commands are currently available'
-  )
+  let userID = socket.id
+  var username = 'New user'
+  axios
+    .post('http://api.codetunnel.net/random-nick', {
+      dataType: 'json'
+    })
+    .then(function(response) {
+      username = response.data.nickname + ' (' + userID + ')'
+    })
+    .then(
+      io.emit(
+        'bot message',
+        username +
+          ' connected. Type !help to see which commands are currently available'
+      )
+    )
+    .catch(function(error) {
+      console.log(error)
+    })
   socket.on('chat message', msg => {
     if (msg) {
+      io.emit('username', username + ':')
       io.emit('chat message', msg)
       if (msg.includes('!help')) {
-        io.emit('chat message', 'This chat utilizes the following commands::')
-        io.emit('chat message', '- Translation (!translate)')
-        io.emit('chat message', '- Youtube link (!youtube)')
-        io.emit('chat message', '- Shuffle text (!shuffle)')
+        io.emit('bot message', 'This chat utilizes the following commands::')
+        io.emit('bot message', '- Translation (!translate)')
+        io.emit('bot message', '- Youtube link (!youtube)')
+        io.emit('bot message', '- Shuffle text (!shuffle)')
       }
       if (msg.includes('!shuffle ') && msg.replace('!youtube ', '') != '') {
         var noShuffle = msg.replace('!shuffle', '')
         var splitmsg = noShuffle.split(' ')
         var shuffled = shuffle(splitmsg).join(' ')
         var addSpaces = shuffled.replaceAll(',', ' ')
-        io.emit('chat message', 'Shuffled message: ' + addSpaces)
+        io.emit('bot message', 'Shuffled message: ' + addSpaces)
       }
       if (msg.includes('!youtube ') && msg.replace('!youtube ', '') != '') {
         var noYT = msg.replace('!youtube', '')
-        var noSpace = noYT.replace(' ', '')
-        var query = noSpace.replaceAll(' ', '+')
+        // var noSpace = noYT.replace(' ', '')
+        // var query = noSpace.replaceAll(' ', '+')
+        var query = encodeURI(noYT)
         url = 'https://www.youtube.com/results?search_query=' + query
-        io.emit('chat message', url)
+        io.emit('link', url)
       }
       if (msg.includes('!translate ') && msg.replace('!translate ', '') != '') {
         var sourceText = msg.replace('!translate', '')
@@ -113,7 +131,7 @@ io.on('connection', socket => {
             console.log(newMsg)
             console.log(JSON.stringify(myJson))
             io.emit(
-              'chat message',
+              'bot message',
               'Recognized language ' +
                 lang +
                 //   ' Message: ' +

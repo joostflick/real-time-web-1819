@@ -33,6 +33,19 @@ form button {
 #messages li {
   padding: 5px 10px;
 }
+#messages a {
+  padding: 5px 10px;
+}
 #messages li:nth-child(odd) {
   background: #eee;
+}
+
+.botmessage {
+  font-weight: bold;
+  color: red;
+}
+
+.username {
+  font-size: 0.8em;
+  color: grey;
 }
