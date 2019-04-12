@@ -12,6 +12,7 @@ form {
   position: fixed;
   bottom: 0;
   width: 100%;
+  display: block;
 }
 form input {
   border: 0;
@@ -29,6 +30,7 @@ form button {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  margin-bottom: 10vh;
 }
 #messages li {
   padding: 5px 10px;
