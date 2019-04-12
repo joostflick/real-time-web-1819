@@ -73,14 +73,13 @@ io.on('connection', socket => {
     })
     .then(function(response) {
       username = response.data.nickname + ' (' + userID + ')'
-    })
-    .then(
       io.emit(
         'bot message',
         username +
           ' connected. Type !help to see which commands are currently available'
       )
-    )
+    })
+
     .catch(function(error) {
       console.log(error)
     })
